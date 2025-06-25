@@ -1,0 +1,25 @@
+# Gmail to Discord Relay Bot Configuration
+
+# Discord Configuration
+discord:
+  # Your Discord bot token (will be loaded from environment variable)
+  token: ${DISCORD_BOT_TOKEN}
+  # Discord channel ID to send messages to
+  channel_id: ${DISCORD_CHANNEL_ID}
+
+# Gmail Configuration
+gmail:
+  # Email filter parameters
+  filter:
+    # List of allowed sender email addresses
+    senders:
+      - "no.reply.inreach@garmin.com"
+      - "cynicaldead@gmail.com"
+    subject: "inReach message from Darren Caldwell"
+  # Check interval in seconds (60 = 1 minute)
+  check_interval: 60
+
+# Logging Configuration
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "bot.log"

@@ -1,0 +1,72 @@
+#!/sbin/openrc-run
+
+name="GPS Bot"
+description="Gmail to Discord Relay Bot for inReach messages"
+
+# Set the user to run the service (change to your VM user)
+command_user="yourusername"
+
+# Path to the application
+directory="/path/to/gmail_discord_relay"
+command="/usr/bin/python3"
+command_args="${directory}/run_bot.sh"
+
+# PID file
+pidfile="/var/run/${RC_SVCNAME}.pid"
+
+# Log file
+logfile="/var/log/${RC_SVCNAME}.log"
+
+# Dependencies
+depend() {
+    need net
+    after firewall
+}
+
+start_pre() {
+    # Ensure the log directory exists
+    checkpath --directory --owner $command_user:$command_user --mode 0755 /var/log
+    
+    # Ensure the directory exists
+    if [ ! -d "$directory" ]; then
+        eerror "Directory $directory does not exist"
+        return 1
+    fi
+    
+    # Ensure the run script exists
+    if [ ! -f "${directory}/run_bot.sh" ]; then
+        eerror "Script ${directory}/run_bot.sh does not exist"
+        return 1
+    fi
+    
+    # Make sure the run script is executable
+    chmod +x "${directory}/run_bot.sh"
+}
+
+start() {
+    ebegin "Starting ${name}"
+    start-stop-daemon --start \
+        --pidfile "${pidfile}" \
+        --make-pidfile \
+        --background \
+        --user "${command_user}" \
+        --chdir "${directory}" \
+        --stdout "${logfile}" \
+        --stderr "${logfile}" \
+        --exec "${command}" -- ${command_args}
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping ${name}"
+    start-stop-daemon --stop \
+        --pidfile "${pidfile}" \
+        --retry TERM/30/KILL/5
+    eend $?
+}
+
+restart() {
+    stop
+    sleep 1
+    start
+}
