@@ -50,29 +50,16 @@ class GmailClient:
             bool: True if authentication was successful, False otherwise
         """
         try:
-            # Check if token.json exists
-            token_path = os.path.join(os.path.dirname(self.credentials_path), 'token.json')
+            # Import the headless authentication module
+            from src.headless_auth import authenticate_headless
             
-            if os.path.exists(token_path):
-                logger.info("Loading existing credentials from token.json")
-                self.credentials = Credentials.from_authorized_user_info(
-                    json.loads(open(token_path).read()), SCOPES)
+            # Use headless authentication
+            logger.info("Using headless authentication for Gmail API")
+            self.credentials = authenticate_headless(self.credentials_path)
             
-            # If there are no valid credentials, let the user log in
-            if not self.credentials or not self.credentials.valid:
-                if self.credentials and self.credentials.expired and self.credentials.refresh_token:
-                    logger.info("Refreshing expired credentials")
-                    self.credentials.refresh(Request())
-                else:
-                    logger.info("Getting new credentials")
-                    flow = InstalledAppFlow.from_client_secrets_file(
-                        self.credentials_path, SCOPES)
-                    self.credentials = flow.run_local_server(port=0)
-                
-                # Save the credentials for the next run
-                with open(token_path, 'w') as token:
-                    token.write(self.credentials.to_json())
-                    logger.info(f"Saved credentials to {token_path}")
+            if not self.credentials:
+                logger.error("Failed to authenticate with Gmail API")
+                return False
             
             # Build the Gmail API service
             self.service = build('gmail', 'v1', credentials=self.credentials)

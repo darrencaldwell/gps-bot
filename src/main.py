@@ -20,9 +20,10 @@ from typing import Dict, Any
 
 from dotenv import load_dotenv
 
-from .gmail_client import GmailClient
-from .email_parser import EmailParser
-from .discord_client import DiscordClient
+# Use absolute imports instead of relative imports
+from src.gmail_client import GmailClient
+from src.email_parser import EmailParser
+from src.discord_client import DiscordClient
 
 # Configure logger
 logging.basicConfig(

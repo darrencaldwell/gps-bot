@@ -5,7 +5,7 @@
 # It will always restart the bot, even after a /die command
 
 # Change to the application directory
-APP_DIR="/path/to/gmail_discord_relay"
+APP_DIR="/root/gps-bot"
 cd "$APP_DIR" || exit 1
 
 # Log file
@@ -26,10 +26,13 @@ if [ -d ".venv" ]; then
     . .venv/bin/activate
 fi
 
+# Add the current directory to PYTHONPATH to fix import issues
+export PYTHONPATH="$APP_DIR:$PYTHONPATH"
+
 # Run the bot with automatic restart
 while true; do
     log_message "Starting GPS Bot"
-    python3 src/main.py
+    python3 -m src.main
     
     EXIT_CODE=$?
     log_message "Bot exited with code $EXIT_CODE"
