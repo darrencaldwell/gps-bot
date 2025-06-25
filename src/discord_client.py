@@ -46,20 +46,45 @@ class DiscordClient:
         @self.bot.event
         async def on_ready():
             logger.info(f"Logged in as {self.bot.user.name} ({self.bot.user.id})")
+            # Sync slash commands with Discord
+            try:
+                logger.info("Syncing application commands with Discord...")
+                await self.bot.tree.sync()
+                logger.info("Application commands synced successfully")
+            except Exception as e:
+                logger.error(f"Error syncing application commands: {str(e)}")
             self.is_ready = True
         
-        # Set up commands
+        # Set up traditional prefix commands
         @self.bot.command(name="ping")
-        async def ping(ctx):
+        async def ping_prefix(ctx):
             """Respond to ping command with a pong message."""
             logger.info(f"Received ping command from {ctx.author}")
             await ctx.send("Hello I'm ponging!")
         
         @self.bot.command(name="die")
-        async def die(ctx):
+        async def die_prefix(ctx):
             """Kill the bot with a dramatic message."""
             logger.info(f"Received die command from {ctx.author}")
             await ctx.send("You kill me, but I will rise as a phoenix! 🔥🦅✨")
+            
+            # Call the kill callback if provided
+            if self.kill_callback:
+                logger.info("Executing kill callback")
+                await self.kill_callback()
+        
+        # Set up slash commands
+        @self.bot.tree.command(name="ping", description="Check if the bot is alive")
+        async def ping_slash(interaction: discord.Interaction):
+            """Respond to ping slash command with a pong message."""
+            logger.info(f"Received ping slash command from {interaction.user}")
+            await interaction.response.send_message("Hello I'm ponging!")
+        
+        @self.bot.tree.command(name="die", description="Shut down the bot")
+        async def die_slash(interaction: discord.Interaction):
+            """Kill the bot with a dramatic message."""
+            logger.info(f"Received die slash command from {interaction.user}")
+            await interaction.response.send_message("You kill me, but I will rise as a phoenix! 🔥🦅✨")
             
             # Call the kill callback if provided
             if self.kill_callback:
