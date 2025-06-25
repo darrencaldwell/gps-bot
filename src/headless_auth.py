@@ -58,7 +58,7 @@ def authenticate_headless(credentials_path):
                     credentials_path, SCOPES)
                 
                 # Run the console flow (no browser needed)
-                credentials = flow.run_console()
+                credentials = flow.run_local_server()
                 
                 # Save the credentials for the next run
                 with open(token_path, 'w') as token:
